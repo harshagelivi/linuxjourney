@@ -1,7 +1,7 @@
-Writing a Hello World! module in linux kernel
+#Writing a Hello World! module in linux kernel
 ====================================
 
-Tried and tested in Ubuntu 12.04:
+##Tried and tested in Ubuntu 12.04 and 14.04:
 ---------------------------------------------
 
 1.Download this zip file and extract.
@@ -10,18 +10,18 @@ Tried and tested in Ubuntu 12.04:
 
 The commands to be run:
 
-sudo make
+```sudo make```
 
-sudo insmod hello.ko  //to insert the module
+```sudo insmod hello.ko  //to insert the module```
 
-tail /var/log/syslog //u can see "hello world!" printed
+```tail /var/log/syslog //u can see "hello world!" printed```
 
-sudo rmmod hello //to remove module
+```sudo rmmod hello //to remove module```
 
-tail /var/log/syslog //u can see gudbye message printed 
+```tail /var/log/syslog //u can see gudbye message printed ```
 
-lsmod - to list the modules
+```lsmod - to list the modules```
 
-modinfo hello.ko - to get info abt that module 
+```modinfo hello.ko - to get info abt that module ```
 
 
