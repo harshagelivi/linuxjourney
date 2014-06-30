@@ -22,3 +22,8 @@ To remove this module: <br/>
 
 To see output of printk(kernel ring buffer):
 **`dmesg `**<br/>
+
+
+References:<br/>
+* [simplefs by psankar](https://github.com/psankar/simplefs)<br/>
+* Linux source code
