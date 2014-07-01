@@ -11,6 +11,31 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Simple Char Device");
 MODULE_AUTHOR("Gelivi");
 
+static int tagfs_iterate(struct file *filp, struct dir_context * dircontext){
+	printk(KERN_INFO "in iterate\n");
+	return 0;
+}
+
+const struct file_operations tagfs_fops = {
+	.owner = THIS_MODULE,
+	.iterate = tagfs_iterate,
+};
+
+struct dentry *tagfs_lookup(struct inode *parent_inode, struct dentry *child_dentry, unsigned int flags){
+	printk(KERN_INFO "in lookup\n");
+	return NULL;
+}
+
+static struct inode_operations tagfs_inode_ops = {
+	.lookup = tagfs_lookup,
+};
+
+
+
+
+
+
+
 /*
 * creates and returns an inode based on the parmeters
 */
@@ -49,6 +74,8 @@ int tagfs_fill_super(struct super_block * sb, void * data, int silent){
 	 */
 	sb->s_magic=0x14031992;
 	inode = tagfs_get_inode(sb, NULL, S_IFDIR, 0);
+	inode->i_op = &tagfs_inode_ops;
+	inode->i_fop = &tagfs_fops;	
 	sb->s_root = d_make_root(inode);
 	if(!sb->s_root) return -ENOMEM;
 
