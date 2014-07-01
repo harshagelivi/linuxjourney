@@ -6,3 +6,6 @@ test*
 *.cmd
 *.symvers
 modules.order
+image
+.tmp*
+tagfs_mkfs
