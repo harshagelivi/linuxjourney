@@ -6,6 +6,8 @@
 #include<linux/kernel.h>
 #include<linux/cdev.h>
 #include<linux/init.h>
+#include <linux/buffer_head.h>
+#include "tagfs.h"
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Simple Char Device");
@@ -18,6 +20,7 @@ static int tagfs_iterate(struct file *filp, struct dir_context * dircontext){
 
 const struct file_operations tagfs_fops = {
 	.owner = THIS_MODULE,
+	/*earlier iterate is readdir*/
 	.iterate = tagfs_iterate,
 };
 
@@ -29,12 +32,6 @@ struct dentry *tagfs_lookup(struct inode *parent_inode, struct dentry *child_den
 static struct inode_operations tagfs_inode_ops = {
 	.lookup = tagfs_lookup,
 };
-
-
-
-
-
-
 
 /*
 * creates and returns an inode based on the parmeters
@@ -67,12 +64,32 @@ struct inode *tagfs_get_inode(struct super_block *sb, const struct inode *dir, u
  * 	silent - Don't complain 
  */
 int tagfs_fill_super(struct super_block * sb, void * data, int silent){
+
 	struct inode * inode;
+	struct buffer_head *  buff_head;
+	struct tagfs_super_block * sb_disk;
+	/* sb_read returns a buffer head which contains block 0 of size s_blocksize data from s_bdev*/
+	buff_head = (struct buffer_head *)sb_bread(sb, 0);
+	/* b_data - pointer to data within the page */
+	sb_disk = (struct tagfs_super_block *)buff_head->b_data;
+	printk(KERN_INFO "The magic number obtained in disk is: [%d]\n", sb_disk->magic);
+
+	if (unlikely(sb_disk->magic != TAGFS_MAGIC_NUMBER)) {
+		printk(KERN_ERR "The filesystem that you try to mount is not of type tagfs. Magicnumber mismatch.");
+		return -EPERM;
+	}
+
+	if (unlikely(sb_disk->block_size != TAGFS_DEFAULT_BLOCK_SIZE)) {
+		printk(KERN_ERR "tagfs seem to be formatted using a non-standard block size.");
+		return -EPERM;
+	}
+
+	printk(KERN_INFO "tagfs filesystem of version [%d] formatted with a block size of [%d] detected in the device.\n", sb_disk->version, sb_disk->block_size);
 	
 	/* A number to uniquely identify our file system
 	 * for more go to http://en.wikipedia.org/wiki/File_format#Magic_number
 	 */
-	sb->s_magic=0x14031992;
+	sb->s_magic= TAGFS_MAGIC_NUMBER;
 	inode = tagfs_get_inode(sb, NULL, S_IFDIR, 0);
 	inode->i_op = &tagfs_inode_ops;
 	inode->i_fop = &tagfs_fops;	

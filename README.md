@@ -8,3 +8,4 @@
 References:<br/>
 * [simplefs by psankar](https://github.com/psankar/simplefs)<br/>
 * Linux source code
+* [Linux Kernel Development by Robert Love](http://www.amazon.com/Linux-Kernel-Development-3rd-Edition/dp/0672329468)
