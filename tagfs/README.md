@@ -1,6 +1,6 @@
 ###To check tagfs:<br/>
 Create a file to mount:<br/>
-**`dd bs=1M count=256 if=/dev/zero of=image`**<br/>
+**`dd bs=4K count=256 if=/dev/zero of=image`**<br/>
 Format the file:<br/>
 **`gcc mkfs-tfs -o mkfs-tfs`**<br/>
 **`./mkfs-tfs image`**<br/>
