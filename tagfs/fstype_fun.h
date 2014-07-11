@@ -1,6 +1,6 @@
 struct dentry * tagfs_mount(struct file_system_type * tfs_type, int flags, const char * name, void * data){
 	struct dentry * ret;
-	tfs_debug("Mounted with flags %d and name %s\n", flags, name);
+	printk(KERN_INFO "Mounted with flags %d and name %s\n", flags, name);
 	ret = mount_bdev(tfs_type, flags, name, data, tagfs_fill_super);
 	if( unlikely(IS_ERR(ret)) ){
 		tfs_debug("failed in mount\n");

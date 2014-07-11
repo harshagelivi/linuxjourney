@@ -1,8 +1,11 @@
 #define TFS_ROOT_INO	(2)
 
+
+/* maximum number of blocks a file can contains */
 #define TFS_N_BLOCKS	(4)
 #define TFS_BLOCK_SIZE	(1024)
 
+/*file name maximum length*/
 #define TFS_FILE_MAXLEN	(64)
 
 #define TFS_MAGIC	(0x14031992)
@@ -12,6 +15,7 @@
 		printk(KERN_DEBUG f, ## __VA_ARGS__);
 typedef uint32_t tint;
 
+/*on disk DS*/
 struct tfs_inode{
 	tint i_mode;
 	tint i_size;
@@ -24,6 +28,7 @@ struct tfs_inode{
 	tint i_blocks;			/*blocks count*/
 	tint i_block[TFS_N_BLOCKS];		/*pointers to blocks*/
 };
+/*on disk DS*/
 struct tfs_super_block{
 	tint s_inodes_count;
 	tint s_blocks_count;
@@ -36,7 +41,7 @@ struct tfs_super_block{
 	tint s_r_blocks_count;
 	tint s_state;
 };
-
+/*on disk DS -- a directory file is filled with these structures*/
 struct tfs_dir_entry{
 	tint inode;
 	tint entry_len;

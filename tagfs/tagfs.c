@@ -22,20 +22,23 @@ struct file_system_type tfs_type={
 	.kill_sb = tagfs_kill_sb,
 };
 struct inode_operations tfs_iops = {
-	
+	.lookup = tfs_iops_lookup,
 };
 struct file_operations tfs_fops = {
 	.owner = THIS_MODULE,
+	.iterate = tfs_fops_iterate,
 };
 #include "fstype_fun.h"
+#include "fops.h"
+#include "iops.h"
 
 static int tagfs_init(void){
 	int ret;
 	ret = register_filesystem(&tfs_type);
 	if(unlikely(ret<0)){
-		tfs_debug("Error registering the filesystem %s. Error- %d\n", tfs_type.name, ret);
+		printk(KERN_INFO"Error registering the filesystem %s. Error- %d\n", tfs_type.name, ret);
 	}else{	
-		tfs_debug("filesystem %s registered successfully\n", tfs_type.name);
+		printk(KERN_INFO "filesystem %s registered successfully\n", tfs_type.name);
 	}
 	return 0;
 }
@@ -44,9 +47,9 @@ static void tagfs_exit(void){
 	int ret;
 	ret = unregister_filesystem(&tfs_type);
 	if(unlikely(ret<0)){
-		tfs_debug("Error unregistering the filesystem %s. Error- %d\n", tfs_type.name, ret);
+		printk(KERN_INFO"Error unregistering the filesystem %s. Error- %d\n", tfs_type.name, ret);
 	}else{	
-		tfs_debug("filesystem %s unregistered successfully\n", tfs_type.name);
+		printk(KERN_INFO "filesystem %s unregistered successfully\n", tfs_type.name);
 	}
 }
 module_init(tagfs_init);
