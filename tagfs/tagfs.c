@@ -15,16 +15,19 @@ MODULE_DESCRIPTION("A Simple File System");
 MODULE_AUTHOR("Gelivi Harsha Vardhan");
 
 #include "prototypes.h"
-struct file_system_type tfs_type={
+static struct file_system_type tfs_type={
 	.owner = THIS_MODULE,
 	.name = "tagfs",
 	.mount = tagfs_mount,
 	.kill_sb = tagfs_kill_sb,
 };
-struct inode_operations tfs_iops = {
+static struct super_operations tfs_sops = {
+
+};
+static struct inode_operations tfs_iops = {
 	.lookup = tfs_iops_lookup,
 };
-struct file_operations tfs_fops = {
+static struct file_operations tfs_fops = {
 	.owner = THIS_MODULE,
 	.iterate = tfs_fops_iterate,
 };
