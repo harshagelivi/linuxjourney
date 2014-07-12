@@ -22,6 +22,15 @@ struct tfs_super_block_mem{
 
 };
 
+struct tfs_inode_mem{
+	tint i_blocks;
+	union{
+		tint i_size;
+		tint i_child_count;
+	};
+	tint i_block[TFS_N_BLOCKS];
+};
+
 #include "prototypes.h"
 
 static struct file_system_type tfs_type={

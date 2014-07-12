@@ -109,6 +109,10 @@ struct inode * tfs_iget(struct super_block * sb, unsigned int ino){
 	struct inode *inode;
 	struct tfs_inode *inode_disk;
 	struct buffer_head *bh;
+	struct tfs_inode_mem *tfs_inode_mem;
+	int blocks,i;
+
+	tfs_inode_mem = kzalloc(sizeof(struct tfs_inode_mem), GFP_KERNEL);
 	
 	inode = iget_locked(sb, ino);
 	if(!ino){
@@ -128,18 +132,22 @@ struct inode * tfs_iget(struct super_block * sb, unsigned int ino){
 	i_gid_write(inode, inode_disk->i_gid);
 
 	set_nlink(inode, inode_disk->i_links_count);
-	inode->i_size = inode_disk->i_size;
 	inode->i_atime.tv_sec = (signed)inode_disk->i_atime;
 	inode->i_ctime.tv_sec = (signed)inode_disk->i_ctime;
 	inode->i_mtime.tv_sec = (signed)inode_disk->i_mtime;
 	inode->i_atime.tv_nsec = inode->i_mtime.tv_nsec = inode->i_ctime.tv_nsec = 0;
 
-	inode->i_blocks = inode_disk->i_blocks;
+	blocks = tfs_inode_mem->i_blocks = inode->i_blocks = inode_disk->i_blocks;
+	for(i=0; i<blocks; i++){
+		tfs_inode_mem->i_block[i] = inode_disk->i_block[i];
+	}
+	inode->i_private = tfs_inode_mem;
 	if(S_ISREG(inode->i_mode)){
-		inode->i_size = inode_disk->i_size;
+		tfs_inode_mem->i_size = inode->i_size = inode_disk->i_size;
 		inode->i_op = &tfs_iops;
 		inode->i_fop = &tfs_fops;
 	}else if(S_ISDIR(inode->i_mode)){
+		tfs_inode_mem->i_child_count = inode_disk->i_child_count;
 		inode->i_op = &tfs_iops;
 		inode->i_fop = &tfs_dirops;
 

@@ -54,11 +54,11 @@ struct tfs_super_block{
 
 /*on disk DS -- a directory file is filled with these structures*/
 struct tfs_dir_entry{
-	tint inode;
+	tint ino;
 	tint entry_len;
 	tint name_len;
 	tint file_type;
-	char name[];
+	char name[TFS_FILE_MAXLEN];
 };
 
 
