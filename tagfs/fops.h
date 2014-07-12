@@ -23,7 +23,6 @@ static int tfs_dirops_iterate (struct file * filp, struct dir_context * dcxt){
 		dir_emit(dcxt, entry->name, TFS_FILE_MAXLEN, entry->ino, DT_UNKNOWN);
 		dcxt->pos += sizeof(struct tfs_dir_entry);
 		entry++;
-		checked_child++;
 	}
 	brelse(bh);
 	printk(KERN_INFO " in iterate pos %d i_size %d sbcount %d\n", (int)pos, (int)inode->i_size, (int)sb->s_count);
