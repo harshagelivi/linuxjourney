@@ -44,7 +44,7 @@ int tagfs_fill_super(struct super_block * sb, void * data, int silent){
  	 * given block of size sb->s_blocksize data from sb->s_bdev
  	 */
 
-	if(! (bh = (struct buffer_head *)sb_bread(sb, TFS_SUPER_BLOCK)) ){
+	if(! (bh = sb_bread(sb, TFS_SUPER_BLOCK)) ){
 		printk(KERN_ERR "Cannot read super block\n");	
 		ret = -EPERM;
 		goto failedsbmem;
@@ -66,12 +66,26 @@ int tagfs_fill_super(struct super_block * sb, void * data, int silent){
 	tsb_mem->s_sb_bh = bh;
 	sb->s_op = &tfs_sops;
 
+	root_inode = tfs_iget(sb, TFS_ROOT_INO);
+	if( unlikely(IS_ERR(root_inode)) ){
+		printk(KERN_ERR "Failed in getting root inode\n");
+		ret = PTR_ERR(root_inode);
+		goto failedbsize;
+	}
+
+	if( unlikely(!S_ISDIR(root_inode->i_mode)) ){
+		printk(KERN_ERR "Corrupt root inode\n");
+		ret = -EINVAL;
+		goto failedbsize;
+	}
+	/*
 	root_inode = new_inode(sb);
 	inode_init_owner(root_inode, NULL, S_IFDIR);
 	root_inode->i_sb = sb;
 	root_inode->i_ino = TFS_ROOT_INO;
 	root_inode->i_op = &tfs_iops;
 	root_inode->i_fop = &tfs_fops;
+	*/
 	sb->s_root = d_make_root(root_inode);
 	if(!sb->s_root){
 		printk(KERN_INFO "failed in fill super\n");
@@ -90,4 +104,59 @@ failedsbmem:
 	kfree(tsb_mem);
 failed:	
 	return ret;	
+}
+struct inode * tfs_iget(struct super_block * sb, unsigned int ino){
+	struct inode *inode;
+	struct tfs_inode *inode_disk;
+	struct buffer_head *bh;
+	
+	inode = iget_locked(sb, ino);
+	if(!ino){
+		return ERR_PTR(-ENOMEM);
+	}
+	if(!(inode->i_state & I_NEW)){
+		return inode;
+	}
+
+	inode_disk = tfs_get_inode(sb, ino, &bh);
+	if(IS_ERR(inode_disk)){
+		iget_failed(inode);
+		return ERR_PTR(-EIO);
+	}
+	inode->i_mode = inode_disk->i_mode;
+	i_uid_write(inode, inode_disk->i_uid);
+	i_gid_write(inode, inode_disk->i_gid);
+
+	set_nlink(inode, inode_disk->i_links_count);
+	inode->i_size = inode_disk->i_size;
+	inode->i_atime.tv_sec = (signed)inode_disk->i_atime;
+	inode->i_ctime.tv_sec = (signed)inode_disk->i_ctime;
+	inode->i_mtime.tv_sec = (signed)inode_disk->i_mtime;
+	inode->i_atime.tv_nsec = inode->i_mtime.tv_nsec = inode->i_ctime.tv_nsec = 0;
+
+	inode->i_blocks = inode_disk->i_blocks;
+	if(S_ISREG(inode->i_mode)){
+		inode->i_size = inode_disk->i_size;
+		inode->i_op = &tfs_iops;
+		inode->i_fop = &tfs_fops;
+	}else if(S_ISDIR(inode->i_mode)){
+		inode->i_op = &tfs_iops;
+		inode->i_fop = &tfs_dirops;
+
+	}
+	inode->i_flags = inode_disk->i_flags;
+	brelse (bh);
+	unlock_new_inode(inode);
+	return inode;	
+}
+static struct tfs_inode * tfs_get_inode(struct super_block * sb, unsigned int ino, struct buffer_head **p){
+	struct buffer_head * bh;
+	unsigned int offset;
+	offset = sizeof(struct tfs_inode)*ino;
+	/*FIXME not the correct block always*/
+	if(! (bh = sb_bread(sb, TFS_INODE_TABLE_BLOCK)) ){
+		return ERR_PTR(-EIO);
+	}
+	*p=bh;
+	return (struct tfs_inode *)(bh->b_data+offset);
 }

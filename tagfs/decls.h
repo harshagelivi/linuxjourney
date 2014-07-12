@@ -6,6 +6,7 @@
 #define TFS_BLOCK_SIZE	(4096)
 #define TFS_ROOT_BLOCK	(8)
 #define TFS_SUPER_BLOCK	(1)
+#define TFS_INODE_TABLE_BLOCK	(3)
 
 /*file name maximum length*/
 #define TFS_FILE_MAXLEN	(64)
@@ -27,6 +28,7 @@ struct tfs_inode{
 	};	
 	tint i_atime;
 	tint i_ctime;
+	tint i_mtime;
 	tint i_uid;
 	tint i_gid;
 	tint i_flags;
@@ -49,13 +51,7 @@ struct tfs_super_block{
 	tint s_block_size;
 	char padding[TFS_BLOCK_SIZE - (10*sizeof(tint))];
 };
-/*super block for tagfs in memory*/
-struct tfs_super_block_mem{
-	struct buffer_head * s_sb_bh;	/* Buffer containing the super block */
-	struct tfs_super_block * s_tsb;	/* Pointer to the super block in the buffer */
-	spinlock_t s_lock;
 
-};
 /*on disk DS -- a directory file is filled with these structures*/
 struct tfs_dir_entry{
 	tint inode;
@@ -64,9 +60,6 @@ struct tfs_dir_entry{
 	tint file_type;
 	char name[];
 };
-
-
-
 
 
 

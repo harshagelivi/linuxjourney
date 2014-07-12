@@ -1,4 +1,4 @@
-int tfs_fops_iterate (struct file * filp, struct dir_context * dcxt){
+int tfs_dirops_iterate (struct file * filp, struct dir_context * dcxt){
 	loff_t pos = dcxt->pos;
 	struct inode * inode = file_inode(filp);
 	struct super_block * sb = inode->i_sb;

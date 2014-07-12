@@ -14,7 +14,16 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("A Simple File System");
 MODULE_AUTHOR("Gelivi Harsha Vardhan");
 
+/*super block for tagfs in memory*/
+struct tfs_super_block_mem{
+	struct buffer_head * s_sb_bh;	/* Buffer containing the super block */
+	struct tfs_super_block * s_tsb;	/* Pointer to the super block in the buffer */
+	spinlock_t s_lock;
+
+};
+
 #include "prototypes.h"
+
 static struct file_system_type tfs_type={
 	.owner = THIS_MODULE,
 	.name = "tagfs",
@@ -29,11 +38,16 @@ static struct inode_operations tfs_iops = {
 };
 static struct file_operations tfs_fops = {
 	.owner = THIS_MODULE,
-	.iterate = tfs_fops_iterate,
+};
+
+static struct file_operations tfs_dirops = {
+	.owner = THIS_MODULE,
+	.iterate = tfs_dirops_iterate,
 };
 #include "fstype_fun.h"
 #include "fops.h"
 #include "iops.h"
+#include "sops.h"
 
 static int tagfs_init(void){
 	int ret;
