@@ -8,4 +8,5 @@ test*
 modules.order
 image
 .tmp*
-tagfs_mkfs
+mkfs-tfs
+check

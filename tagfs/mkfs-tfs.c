@@ -33,12 +33,13 @@ int main(int argc, char *argv[]){
 
 	pad[2]=1;
 	numbytes = write(fd, (void *)&pad, sizeof(pad));	
-	printf("Inode map written - %d\n", numbytes);	
+	printf("Inode map written - %d\n\n", numbytes);	
 	pad[2]=0;
 
 	inode.i_mode = S_IFDIR;
 	inode.i_ino = TFS_ROOT_INO;
-	inode.i_child_count = 1;
+	inode.i_child_count = 2;
+	inode.i_links_count = 1;
 	inode.i_blocks = 1;
 	inode.i_block[0] = TFS_ROOT_BLOCK;
 	offset = lseek(fd, TFS_ROOT_INO*sizeof(struct tfs_inode), SEEK_CUR);
@@ -48,9 +49,19 @@ int main(int argc, char *argv[]){
 	inode.i_mode = S_IFREG;
 	inode.i_ino = 3;
 	inode.i_blocks = 1;
+	inode.i_size = 30;
 	inode.i_block[0] = 9;
+	inode.i_links_count = 1;	
 	numbytes = write(fd, (void *)&inode, sizeof(inode));	
 	printf("file1 inode written - %d\n", numbytes);
+
+	inode.i_mode = S_IFDIR;
+	inode.i_ino = 4;
+	inode.i_blocks = 1;
+	inode.i_block[0] = 10;
+	inode.i_links_count = 1;	
+	numbytes = write(fd, (void *)&inode, sizeof(inode));	
+	printf(".. inode written - %d\n\n", numbytes);
 
 	offset = lseek(fd, 5*TFS_BLOCK_SIZE, SEEK_SET);
 	pad[0]=pad[1]=pad[2]=pad[3]=pad[4]=pad[5]=pad[8]=1;
@@ -66,6 +77,18 @@ int main(int argc, char *argv[]){
 	numbytes = write(fd, (void *)&entry, sizeof(entry));
 	printf("Dir entry for file1 is written - %d\n", numbytes);
 
+	entry.ino = 4;
+	entry.name_len = 3;
+	strcpy(entry.name, "..");
+	numbytes = write(fd, (void *)&entry, sizeof(entry));
+	printf("Dir entry for .. is written - %d\n\n", numbytes);
+	
+	offset = lseek(fd,  9* TFS_BLOCK_SIZE, SEEK_SET);
+	char body[]="my first sentence in file1";
+	numbytes = write(fd, (void *)(body), sizeof(body)+1);
+	printf("Body for file1 is written - %d\n", numbytes);
+	
+		
 	close(fd);	
 	return 0;
 }

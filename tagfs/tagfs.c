@@ -10,6 +10,8 @@
 #include<linux/buffer_head.h>
 #include "decls.h"
 
+static int glo_callno = 0;
+
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("A Simple File System");
 MODULE_AUTHOR("Gelivi Harsha Vardhan");
@@ -22,6 +24,7 @@ struct tfs_super_block_mem{
 
 };
 
+/*disk inode related information in memory*/
 struct tfs_inode_mem{
 	tint i_blocks;
 	union{
@@ -34,24 +37,26 @@ struct tfs_inode_mem{
 #include "prototypes.h"
 
 static struct file_system_type tfs_type={
-	.owner = THIS_MODULE,
-	.name = "tagfs",
-	.mount = tagfs_mount,
-	.kill_sb = tagfs_kill_sb,
+	.owner	=	THIS_MODULE,
+	.name	=	"tagfs",
+	.mount	=	tagfs_mount,
+	.kill_sb	=	tagfs_kill_sb,
 };
 static struct super_operations tfs_sops = {
 
 };
 static struct inode_operations tfs_iops = {
-	.lookup = tfs_iops_lookup,
+	.lookup	=	tfs_iops_lookup,
 };
 static struct file_operations tfs_fops = {
-	.owner = THIS_MODULE,
+	.owner	=	THIS_MODULE,
+	.open	=	tfs_fops_open,
+	.read	=	tfs_fops_read,
 };
 
 static struct file_operations tfs_dirops = {
-	.owner = THIS_MODULE,
-	.iterate = tfs_dirops_iterate,
+	.owner	=	THIS_MODULE,
+	.iterate	=	tfs_dirops_iterate,
 };
 #include "fstype_fun.h"
 #include "fops.h"
